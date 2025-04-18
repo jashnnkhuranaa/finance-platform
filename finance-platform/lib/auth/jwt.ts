@@ -24,6 +24,7 @@ export const verifyRefreshToken = (token: string) => {
   return jwt.verify(token, REFRESH_TOKEN_SECRET);
 };
 
+// setting auth cookies both access and refresh tokens
 export const setAuthCookies = (res: NextResponse, accessToken: string, refreshToken: string) => {
   res.cookies.set('access_token', accessToken, {
     httpOnly: true,

@@ -1,8 +1,7 @@
-// app/api/auth/signup/route.ts
-
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { users, User } from '@/lib/db/users';
+import { signAccessToken, signRefreshToken, setAuthCookies } from '@/lib/auth/jwt';
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -28,5 +27,15 @@ export async function POST(req: Request) {
 
   users.push(newUser);
 
-  return NextResponse.json({ message: 'User registered successfully', user: { id: newUser.id, email, role } }, { status: 201 });
+  const accessToken = signAccessToken({ id: newUser.id, role: newUser.role });
+  const refreshToken = signRefreshToken({ id: newUser.id });
+
+  const response = NextResponse.json({
+    message: 'User registered successfully',
+    user: { id: newUser.id, email, role: newUser.role },
+  });
+
+  setAuthCookies(response, accessToken, refreshToken);
+
+  return response;
 }
