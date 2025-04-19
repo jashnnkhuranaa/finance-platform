@@ -2,26 +2,33 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password, role }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password, role: 'user' }), // 👈 defaulting role here
     });
 
+    const data = await res.json();
+
     if (res.ok) {
+      toast.success('Signup successful! Please login');
       router.push('/login');
     } else {
-      const data = await res.json();
-      alert(data.error || 'Signup failed');
+      setError(data.error || 'Signup failed');
     }
   };
 
@@ -41,17 +48,10 @@ export default function SignupPage() {
         onChange={(e) => setPassword(e.target.value)}
         className="border p-2"
       />
-      <select
-        value={role}
-        onChange={(e) => setRole(e.target.value)}
-        className="border p-2"
-      >
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-      </select>
       <button type="submit" className="bg-blue-600 text-white p-2">
         Sign Up
       </button>
+      {error && <p className="text-red-600">{error}</p>}
     </form>
   );
 }
