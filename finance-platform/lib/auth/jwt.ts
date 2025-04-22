@@ -26,14 +26,14 @@ export const verifyRefreshToken = (token: string) => {
 
 // setting auth cookies both access and refresh tokens
 export const setAuthCookies = (res: NextResponse, accessToken: string, refreshToken: string) => {
-  res.cookies.set('access_token', accessToken, {
+  res.cookies.set('accessToken', accessToken, {
     httpOnly: true,
     secure: true,
     path: '/',
     maxAge: 60 * 15, // 15 minutes
   });
 
-  res.cookies.set('refresh_token', refreshToken, {
+  res.cookies.set('refreshToken', refreshToken, {
     httpOnly: true,
     secure: true,
     path: '/',
@@ -44,7 +44,7 @@ export const setAuthCookies = (res: NextResponse, accessToken: string, refreshTo
 };
 
 export const clearAuthCookies = (res: NextResponse) => {
-  res.cookies.set('access_token', '', { path: '/', maxAge: 0 });
-  res.cookies.set('refresh_token', '', { path: '/', maxAge: 0 });
+  res.cookies.set('accessToken', '', { path: '/', maxAge: 0 });
+  res.cookies.set('refreshToken', '', { path: '/', maxAge: 0 });
   return res;
 };

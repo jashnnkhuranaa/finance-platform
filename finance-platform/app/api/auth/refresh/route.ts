@@ -11,7 +11,7 @@ import { NextResponse } from 'next/server';
 export async function POST() {
   // ✅ Get cookie safely
   const cookieStore = await cookies();
-  const refreshCookie = cookieStore.get('refresh_token');
+  const refreshCookie = cookieStore.get('refreshToken');
   const refreshToken = refreshCookie?.value;
 
   if (!refreshToken) {
