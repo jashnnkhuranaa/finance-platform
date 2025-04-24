@@ -120,3 +120,11 @@
     @apply bg-background text-foreground;
   }
 }
+/* globals.css */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Prevents scrolling */
+}
