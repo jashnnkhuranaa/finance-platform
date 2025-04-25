@@ -16,6 +16,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { Poppins } from 'next/font/google';
+
+const poppins = Poppins({
+  weight: ['400', '700'], // 400 = normal, 700 = bold
+  subsets: ['latin'],
+  variable: '--font-poppins',
+});
+
 export const metadata: Metadata = {
   title: "Fineance",
   description: "Finance dashboard for modern users",

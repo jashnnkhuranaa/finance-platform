@@ -1,3 +1,4 @@
+//navigation.jsx
 'use client'
 
 import { useState } from "react"
@@ -66,7 +67,8 @@ export const Navigation = () => {
   }
 
   return (
-    <nav className="hidden lg:flex items-center gap-8">
+    <nav className="hidden lg:flex items-center gap-4 flex-wrap">
+
       {routes.map((route) => (
         <NavButton
           key={route.href}
