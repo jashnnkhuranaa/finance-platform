@@ -1,3 +1,5 @@
+"use client";
+
 import ButtonLogout from '@/components/ButtonLogout';
 
 export default function DashboardPage() {
