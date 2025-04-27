@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 import { Poppins } from 'next/font/google';
+import { QueryProviders } from "@/providers/query-provider";
 
 const poppins = Poppins({
   weight: ['400', '700'], // 400 = normal, 700 = bold
@@ -45,7 +46,10 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          <QueryProviders>
           {children}
+          </QueryProviders>
+          
           <Toaster position="top-right" />
         </body>
       </html>
