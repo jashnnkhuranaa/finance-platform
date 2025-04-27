@@ -1,40 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { createConnection } from '@/lib/db/db';
+import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth/jwt';
+import { randomUUID } from 'crypto'; // createId ki jagah
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const token = req.cookies.get('accessToken')?.value;
 
   if (!token) {
-    return NextResponse.json({ error: 'Unauthorized: Token not found' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const decoded = verifyAccessToken(token);
 
     if (typeof decoded !== 'string' && 'userId' in decoded) {
-      const userId = decoded.userId; // ✅ UserId uthaya decoded token se
+      const userId = decoded.userId;
+      const body = await req.json();
+      const { name } = body;
+
+      if (!name || typeof name !== 'string' || name.trim() === '') {
+        return NextResponse.json({ error: 'Invalid name input' }, { status: 400 });
+      }
 
       const connection = await createConnection();
 
       try {
-        const [rows] = await connection.execute(
-          'SELECT id, name FROM accounts WHERE user_id = ?', [userId]
-          // ✅ Only apne user ke accounts laane ka query
+        const [result] = await connection.execute(
+          'INSERT INTO accounts (id, user_id, name) VALUES (?, ?, ?)',
+          [randomUUID(), userId, name.trim()]
         );
 
-        return NextResponse.json({ data: rows });
-      } catch (error) {
-        console.error('Error fetching accounts:', error);
-        return NextResponse.json({ error: 'Failed to fetch accounts' }, { status: 500 });
+        return NextResponse.json({ message: 'Account created successfully', result });
+      } catch (dbError) {
+        console.error('DB Error:', dbError);
+        return NextResponse.json({ error: 'Failed to create account' }, { status: 500 });
       } finally {
         await connection.end();
       }
+
     } else {
-      return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
-  } catch (error) {
-    console.error('Token verification error:', error);
-    return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
+  } catch (err) {
+    console.error('Token error:', err);
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 }

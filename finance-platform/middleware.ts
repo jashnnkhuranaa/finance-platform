@@ -32,7 +32,7 @@
 //   return NextResponse.next();
 // }
 
-// // ✅ This goes in middleware.ts — NOT in next.config.ts
+// // // ✅ This goes in middleware.ts — NOT in next.config.ts
 // export const config = {
 //   matcher: ['/dashboard/:path*', '/admin-only/:path*'],
 // };
