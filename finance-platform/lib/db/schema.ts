@@ -8,6 +8,7 @@ async function createTables() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         userId VARCHAR(255) NOT NULL,
+        plaidId VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
