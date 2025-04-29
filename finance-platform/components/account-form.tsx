@@ -1,8 +1,10 @@
-"use client";
+//account-form.tsx
 
-import { z } from "zod";
-import { Trash } from "lucide-react";
+'use client';
+
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Trash } from "lucide-react";;
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "@/components/ui/input";
@@ -16,6 +18,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { createAccount } from "@/app/api/accounts/actions/create-account";
+
 const formSchema = z.object({
   name: z.string().min(1, "Account name is required"),
 });
@@ -25,7 +29,7 @@ type FormValues = z.infer<typeof formSchema>;
 type Props = {
   id?: string;
   defaultValues?: FormValues;
-  onSubmit: (data: FormValues) => void;
+  onSubmit?: (data: FormValues) => void;
   onDelete?: (id: string) => void;
   disabled?: boolean;
 };
@@ -42,8 +46,16 @@ export const AccountForm = ({
     defaultValues: defaultValues || { name: "" },
   });
 
-  const handleSubmit = (data: FormValues) => {
-    onSubmit(data);
+  const handleSubmit = async (data: FormValues) => {
+    const result = await createAccount(data); // 👈 Directly pass { name }
+  
+    if (result?.error) {
+      console.error(result.error);
+      // TODO: Show toast or error message
+    } else {
+      console.log("✅ Account created");
+      onSubmit?.(data);
+    }
   };
 
   return (
