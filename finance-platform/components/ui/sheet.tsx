@@ -5,17 +5,16 @@ import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Root component
 const Sheet = SheetPrimitive.Root
 
-// Trigger button
 const SheetTrigger = SheetPrimitive.Trigger
 
-// Title and Description (direct export)
 const SheetTitle = SheetPrimitive.Title
-const SheetDescription = SheetPrimitive.Description
+SheetTitle.displayName = "SheetTitle"
 
-// Content (yeh full screen wala hai)
+const SheetDescription = SheetPrimitive.Description
+SheetDescription.displayName = "SheetDescription"
+
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> & {
@@ -32,7 +31,7 @@ const SheetContent = React.forwardRef<
         side === "left" && "left-0",
         side === "top" && "top-0",
         side === "bottom" && "bottom-0",
-        "w-full h-full", // FULL SCREEN
+        "w-full h-full", // Fullscreen layout
         className
       )}
       {...props}
@@ -45,13 +44,18 @@ const SheetContent = React.forwardRef<
     </SheetPrimitive.Content>
   </SheetPrimitive.Portal>
 ))
-
 SheetContent.displayName = "SheetContent"
 
-// Header
-const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-2 text-center sm:text-left", className)} {...props} />
-)
+const SheetHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-2 text-center sm:text-left", className)}
+    {...props}
+  />
+))
 SheetHeader.displayName = "SheetHeader"
 
 export {

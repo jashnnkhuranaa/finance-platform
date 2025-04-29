@@ -1,7 +1,9 @@
-import { createConnection } from './db'; // Connection file import karo
+//lib/db/schema.ts
+
+import { createConnection } from './db';
 
 async function createTables() {
-  const connection = await createConnection();  // Connection lete hain
+  const connection = await createConnection();
   try {
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS accounts (
@@ -12,11 +14,11 @@ async function createTables() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('accounts table created successfully');
+    console.log('✅ accounts table created successfully');
   } catch (error) {
-    console.error('Error creating table:', error);
+    console.error('❌ Error creating table:', error);
   } finally {
-    await connection.end();  // Connection ko end karte hain
+    await connection.end();
   }
 }
 
