@@ -24,7 +24,7 @@ export default function LoginPage() {
 
     if (res.ok) {
       // Redirect to the dashboard after successful login
-      router.push('/dashboard');
+      router.push('/');
       console.log('Login response status:', res.status);
       console.log('Login response ok:', res.ok);
     } else {
