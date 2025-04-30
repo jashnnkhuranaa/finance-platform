@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Card,
   CardContent,
@@ -6,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Payment, columns } from "./columns"
+import { Payment, columns } from "@/app/(dashboard)/accounts/columns";
 import { DataTable } from "@/components/accounts/data-table"
 
 const data: Payment[] = [
@@ -33,7 +35,11 @@ const AccountsPage = () => {
   </CardHeader>
 
   <CardContent>
-    <DataTable columns={columns} data={data} />
+    <DataTable 
+    columns={columns} 
+    data={data} 
+    onDelete={()=> {}}
+    disabled={false} />
   </CardContent>
 </Card>
 
