@@ -1,4 +1,3 @@
-
 // components/accounts/data-table.tsx
 'use client';
 
@@ -31,7 +30,7 @@ import { Trash } from 'lucide-react';
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onDelete?: (rows: Row<TData>[]) => void; // Updated to handle multiple rows
+  onDelete?: (rows: Row<TData>[]) => void;
   disabled?: boolean;
 }
 
@@ -66,7 +65,7 @@ export function DataTable<TData, TValue>({
     if (onDelete) {
       const selectedRows = table.getFilteredSelectedRowModel().rows;
       onDelete(selectedRows);
-      table.resetRowSelection(); // Clear selection after delete
+      table.resetRowSelection();
     }
   };
 
@@ -74,7 +73,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className='flex items-center py-4'>
         <Input
-          placeholder='Filter accounts by name...'
+          placeholder='Search name'
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
             table.getColumn('name')?.setFilterValue(event.target.value)
@@ -131,7 +130,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  No accounts found.
+                  No categories found.
                 </TableCell>
               </TableRow>
             )}

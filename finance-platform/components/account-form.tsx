@@ -1,116 +1,71 @@
+
 // components/account-form.tsx
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Trash } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-
 import { createAccount } from '@/app/api/accounts/actions/create-account';
+import { createCategory } from '@/app/api/categories/actions/create-category';
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Account name is required'),
+  name: z.string().min(1, 'Name is required'),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+interface AccountFormProps {
+  type: 'account' | 'category';
+  onSuccess: () => void;
+}
 
-type Props = {
-  id?: string;
-  defaultValues?: FormValues;
-  onSubmit?: (data: FormValues) => void;
-  onDelete?: (id: string) => void;
-  disabled?: boolean;
-};
-
-export const AccountForm = ({
-  id,
-  defaultValues,
-  onSubmit,
-  onDelete,
-  disabled,
-}: Props) => {
-  const form = useForm<FormValues>({
+export function AccountForm({ type, onSuccess }: AccountFormProps) {
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues || { name: '' },
+    defaultValues: {
+      name: '',
+    },
   });
 
-  const handleSubmit = async (data: FormValues) => {
-    const result = await createAccount(data);
-    if (result?.error) {
-      console.error(result.error);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Convert values to FormData
+    const formData = new FormData();
+    formData.append('name', values.name);
+
+    const action = type === 'account' ? createAccount : createCategory;
+    const result = await action(formData);
+
+    if (result.error) {
       toast.error(result.error);
     } else {
-      console.log('✅ Account created');
-      toast.success('Account created successfully');
-      onSubmit?.(data);
+      toast.success(`${type === 'account' ? 'Account' : 'Category'} created successfully`);
+      form.reset();
+      onSuccess();
     }
   };
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-6 mt-6"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-gray-700">
-                Account Name
-              </FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder="e.g. Personal Savings"
-                  disabled={disabled}
-                  className="focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary"
-                />
+                <Input placeholder="Enter name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        <div className="flex justify-between items-center gap-4 pt-2">
-          {id && onDelete && (
-            <Button
-              type="button"
-              onClick={() => onDelete(id)}
-              disabled={disabled}
-              variant="outline"
-              className="text-red-600 border-red-300 hover:bg-red-50"
-            >
-              <Trash className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
-          )}
-
-          <div className="ml-auto">
-            <Button
-              type="submit"
-              disabled={disabled}
-              className="bg-black text-white hover:bg-gray-900"
-            >
-              {id ? 'Update Account' : 'Create Account'}
-            </Button>
-          </div>
-        </div>
+        <Button type="submit" className="w-full">
+          Submit
+        </Button>
       </form>
     </Form>
   );
-};
+}

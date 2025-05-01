@@ -1,5 +1,5 @@
 
-// app/api/accounts/actions/create-account.ts
+// app/api/categories/actions/create-category.ts
 'use server';
 
 import { cookies } from 'next/headers';
@@ -23,7 +23,7 @@ async function getUserIdFromToken(): Promise<string | null> {
   }
 }
 
-export async function createAccount(formData: FormData) {
+export async function createCategory(formData: FormData) {
   const name = formData.get('name')?.toString();
   if (!name) {
     return { error: 'Name is required' };
@@ -38,25 +38,25 @@ export async function createAccount(formData: FormData) {
     const conn = await createConnection();
     const id = uuidv4();
     const [existing] = await conn.execute<RowDataPacket[]>(
-      'SELECT 1 FROM accounts WHERE userId = ? AND name = ? LIMIT 1',
+      'SELECT 1 FROM categories WHERE userId = ? AND name = ? LIMIT 1',
       [userId, name]
     );
 
     if (existing.length > 0) {
       await conn.end();
-      return { error: 'Account already exists' };
+      return { error: 'Category already exists' };
     }
 
     await conn.execute(
-      'INSERT INTO accounts (id, userId, name, plaidId, created_at) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO categories (id, userId, name, plaidId, created_at) VALUES (?, ?, ?, ?, ?)',
       [id, userId, name, null, new Date()]
     );
 
     await conn.end();
-    console.log(`✅ Created account: ${name} for userId: ${userId}`);
+    console.log(`✅ Created category: ${name} for userId: ${userId}`);
     return { success: true };
   } catch (err) {
-    console.error('❌ Error creating account:', err);
+    console.error('❌ Error creating category:', err);
     return { error: 'Something went wrong' };
   }
 }

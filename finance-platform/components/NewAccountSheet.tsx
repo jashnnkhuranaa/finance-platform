@@ -1,32 +1,25 @@
-import { useNewAccount } from "../app/api/accounts/hooks/use-new-account";
-import { createAccount } from "../app/api/accounts/actions/create-account"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { AccountForm } from "@/components/account-form";
+// components/new-account-sheet.tsx
+'use client';
 
-export const NewAccountSheet = () => {
+import { useNewAccount } from '@/app/api/accounts/hooks/use-new-account';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { AccountForm } from './account-form';
+
+interface NewAccountSheetProps {
+  type?: 'account' | 'category'; // Add type prop to distinguish
+}
+
+export function NewAccountSheet({ type = 'account' }: NewAccountSheetProps) {
   const { isOpen, onClose } = useNewAccount();
-
-  if (!isOpen) return null;
-
-  const handleSubmit = async (data: { name: string }) => {
-    try {
-      await createAccount(data); // 👈 server action call
-      onClose(); // close the drawer after successful submission
-    } catch (error) {
-      console.error("Failed to create account:", error);
-    }
-  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent>
+      <SheetContent className="space-y-4">
         <SheetHeader>
-          <SheetTitle>New Account</SheetTitle>
-          <SheetDescription>Enter details to create a new account.</SheetDescription>
+          <SheetTitle>{type === 'account' ? 'New Account' : 'New Category'}</SheetTitle>
         </SheetHeader>
-
-        <AccountForm onSubmit={handleSubmit} />
+        <AccountForm type={type} onSuccess={onClose} />
       </SheetContent>
     </Sheet>
   );
-};
+}

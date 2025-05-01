@@ -1,4 +1,3 @@
-// schema.ts
 import { createConnection } from './db';
 
 async function createTables() {
@@ -29,6 +28,20 @@ async function createTables() {
       )
     `);
     console.log('✅ accounts table created successfully');
+
+    // Create categories table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id VARCHAR(36) NOT NULL PRIMARY KEY,
+        userId VARCHAR(36) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        plaidId VARCHAR(255),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES users(id)
+      )
+    `);
+    console.log('✅ categories table created successfully');
+
   } catch (error) {
     console.error('❌ Error creating tables:', error);
   } finally {
@@ -37,4 +50,3 @@ async function createTables() {
 }
 
 export { createTables };
-
