@@ -1,14 +1,15 @@
-//account-form.tsx
-
+// components/account-form.tsx
 'use client';
 
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Trash } from "lucide-react";;
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Trash } from 'lucide-react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -16,12 +17,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
-import { createAccount } from "@/app/api/accounts/actions/create-account";
+import { createAccount } from '@/app/api/accounts/actions/create-account';
 
 const formSchema = z.object({
-  name: z.string().min(1, "Account name is required"),
+  name: z.string().min(1, 'Account name is required'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -43,17 +44,17 @@ export const AccountForm = ({
 }: Props) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues || { name: "" },
+    defaultValues: defaultValues || { name: '' },
   });
 
   const handleSubmit = async (data: FormValues) => {
-    const result = await createAccount(data); // 👈 Directly pass { name }
-  
+    const result = await createAccount(data);
     if (result?.error) {
       console.error(result.error);
-      // TODO: Show toast or error message
+      toast.error(result.error);
     } else {
-      console.log("✅ Account created");
+      console.log('✅ Account created');
+      toast.success('Account created successfully');
       onSubmit?.(data);
     }
   };
@@ -105,7 +106,7 @@ export const AccountForm = ({
               disabled={disabled}
               className="bg-black text-white hover:bg-gray-900"
             >
-              {id ? "Update Account" : "Create Account"}
+              {id ? 'Update Account' : 'Create Account'}
             </Button>
           </div>
         </div>

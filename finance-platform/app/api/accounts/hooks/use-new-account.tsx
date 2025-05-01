@@ -1,4 +1,5 @@
-import { create } from "zustand";
+// hooks/use-new-account.ts
+import { create } from 'zustand';
 
 type NewAccountState = {
   isOpen: boolean;

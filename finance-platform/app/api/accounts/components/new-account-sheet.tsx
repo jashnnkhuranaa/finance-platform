@@ -1,21 +1,23 @@
-// yahi actual form hai jo website pe dikh rha hai
+// components/new-account-sheet.tsx
+'use client';
 
-import { useNewAccount } from "../hooks/use-new-account";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { AccountForm } from "@/components/account-form" // 👈 make sure path sahi ho
+import { useNewAccount } from '../hooks/use-new-account';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { AccountForm } from '@/components/account-form';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const NewAccountSheet = () => {
   const { isOpen, onClose } = useNewAccount();
 
   const handleCreate = (data: { name: string }) => {
-    console.log("Form submitted:", data);
-    // TODO: Yaha actual account create logic lagao
-    onClose(); // Close the sheet after submission
+    console.log('✅ AccountForm submitted:', data);
+    onClose();
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { 
-      if (!open) onClose(); 
+    <Sheet open={isOpen} onOpenChange={(open) => {
+      if (!open) onClose();
     }}>
       <SheetContent>
         <SheetHeader>
@@ -24,8 +26,6 @@ export const NewAccountSheet = () => {
             Create a new account to manage your finances.
           </SheetDescription>
         </SheetHeader>
-
-        {/* 👇 Ye form render karega inside sheet */}
         <AccountForm onSubmit={handleCreate} />
       </SheetContent>
     </Sheet>

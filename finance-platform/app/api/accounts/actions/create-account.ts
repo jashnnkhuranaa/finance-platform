@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { createConnection } from '@/lib/db/db';
 import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
+import { verifyAccessToken } from '@/lib/auth/jwt';
 import { RowDataPacket } from 'mysql2';
 
 const formSchema = z.object({
@@ -12,15 +12,13 @@ const formSchema = z.object({
 
 type Input = z.infer<typeof formSchema>;
 
-// 🔐 Get userId from JWT token in cookies
-// ✅ Get userId from JWT token stored in cookie
 async function getUserIdFromToken(): Promise<string | null> {
   try {
-    const cookieStore = await cookies(); // ✅ await it here
+    const cookieStore = await cookies();
     const token = cookieStore.get('accessToken')?.value;
-    if(!token) {return null;}
+    if (!token) return null;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    const decoded = verifyAccessToken(token);
     return decoded.id;
   } catch (err) {
     console.error('❌ Invalid or missing JWT:', err);
@@ -28,16 +26,15 @@ async function getUserIdFromToken(): Promise<string | null> {
   }
 }
 
-// 📦 Get plaidId for user from DB
 export async function getPlaidIdForUser(userId: string): Promise<string | null> {
   const conn = await createConnection();
   try {
     const [result] = await conn.execute(
-      'SELECT plaidId FROM accounts WHERE userId = ? LIMIT 1',
+      'SELECT plaidId FROM users WHERE id = ? LIMIT 1',
       [userId]
     );
 
-    const rows = result as RowDataPacket[]; // ✅ cast after destructuring
+    const rows = result as RowDataPacket[];
     return rows[0]?.plaidId || null;
   } catch (error) {
     console.error('❌ Error fetching plaidId:', error);
@@ -67,17 +64,14 @@ export async function createAccount(input: Input) {
 
   try {
     const conn = await createConnection();
-
     await conn.execute(
       `INSERT INTO accounts (name, userId, plaidId) VALUES (?, ?, ?)`,
       [name, userId, plaidId]
     );
-
     await conn.end();
-
     return { success: true };
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error creating account:', err);
     return { error: 'Something went wrong' };
   }
 }

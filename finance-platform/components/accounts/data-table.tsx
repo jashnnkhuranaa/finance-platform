@@ -1,5 +1,8 @@
-"use client"
-import * as React from "react";
+
+// components/accounts/data-table.tsx
+'use client';
+
+import * as React from 'react';
 import {
   ColumnDef,
   SortingState,
@@ -11,7 +14,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
+} from '@tanstack/react-table';
 
 import {
   Table,
@@ -20,15 +23,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "../ui/button"
-import { Input } from "@/components/ui/input"
-import { Trash } from "lucide-react";
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Trash } from 'lucide-react';
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  onDelete?: (row: Row<TData>) => void;
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  onDelete?: (rows: Row<TData>[]) => void; // Updated to handle multiple rows
   disabled?: boolean;
 }
 
@@ -38,9 +41,9 @@ export function DataTable<TData, TValue>({
   onDelete,
   disabled,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -55,35 +58,45 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
-      rowSelection
+      rowSelection,
     },
   });
 
+  const handleDelete = () => {
+    if (onDelete) {
+      const selectedRows = table.getFilteredSelectedRowModel().rows;
+      onDelete(selectedRows);
+      table.resetRowSelection(); // Clear selection after delete
+    }
+  };
+
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className='flex items-center py-4'>
         <Input
-          placeholder="Filter accounts..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder='Filter accounts by name...'
+          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn('name')?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className='max-w-sm'
         />
       </div>
 
       {table.getRowModel().rows.length > 0 && (
         <Button
-          disabled={disabled}
-          size="sm"
-          variant="outline"
-          className="ml-auto font-normal text-xs">
-          <Trash className="size-4 mr-2" />
+          disabled={disabled || table.getFilteredSelectedRowModel().rows.length === 0}
+          size='sm'
+          variant='outline'
+          onClick={handleDelete}
+          className='ml-auto font-normal text-xs'
+        >
+          <Trash className='size-4 mr-2' />
           Delete ({table.getFilteredSelectedRowModel().rows.length})
         </Button>
       )}
 
-      <div className="rounded-md border">
+      <div className='rounded-md border'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -106,7 +119,7 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -117,8 +130,8 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                <TableCell colSpan={columns.length} className='h-24 text-center'>
+                  No accounts found.
                 </TableCell>
               </TableRow>
             )}
@@ -126,22 +139,22 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+      <div className='flex items-center justify-end space-x-2 py-4'>
+        <div className='flex-1 text-sm text-muted-foreground'>
+          {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
         <Button
-          variant="outline"
-          size="sm"
+          variant='outline'
+          size='sm'
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           Previous
         </Button>
         <Button
-          variant="outline"
-          size="sm"
+          variant='outline'
+          size='sm'
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
@@ -149,5 +162,5 @@ export function DataTable<TData, TValue>({
         </Button>
       </div>
     </div>
-  )
+  );
 }

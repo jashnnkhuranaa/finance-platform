@@ -2,6 +2,10 @@
 
 import { NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken';
+import { config } from 'dotenv';
+
+// Explicitly load .env.local file
+config({ path: '.env.local' });
 import { cookies } from 'next/headers';
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access-secret';

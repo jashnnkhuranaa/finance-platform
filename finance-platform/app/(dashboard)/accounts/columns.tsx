@@ -1,32 +1,32 @@
-"use client"
+// app/(dashboard)/accounts/columns.tsx
+'use client';
 
-import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import type { CheckedState } from "@radix-ui/react-checkbox"
+import { ColumnDef } from '@tanstack/react-table';
+import { ArrowUpDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import type { CheckedState } from '@radix-ui/react-checkbox';
 
-// Ye type define karta hai ek payment row ka structure
-export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+export interface Account {
+  id: string;
+  name: string;
+  plaidId: string | null;
+  created_at: string;
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Account>[] = [
   {
-    id: "select",
+    id: 'select',
     header: ({ table }) => (
       <Checkbox
         checked={
           table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value: CheckedState) =>
           table.toggleAllPageRowsSelected(!!value)
         }
-        aria-label="Select all"
+        aria-label='Select all'
       />
     ),
     cell: ({ row }) => (
@@ -35,35 +35,32 @@ export const columns: ColumnDef<Payment>[] = [
         onCheckedChange={(value: CheckedState) =>
           row.toggleSelected(!!value)
         }
-        aria-label="Select row"
+        aria-label='Select row'
       />
     ),
     enableSorting: false,
     enableHiding: false,
   },
-
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: 'name',
+    header: ({ column }) => (
+      <Button
+        variant='ghost'
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Account Name
+        <ArrowUpDown className='ml-2 h-4 w-4' />
+      </Button>
+    ),
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() =>
-            column.toggleSorting(column.getIsSorted() === "asc")
-          }
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    accessorKey: 'plaidId',
+    header: 'Plaid ID',
+    cell: ({ row }) => row.original.plaidId || 'N/A',
   },
   {
-    accessorKey: "amount",
-    header: "Amount",
+    accessorKey: 'created_at',
+    header: 'Created At',
+    cell: ({ row }) => new Date(row.original.created_at).toLocaleDateString(),
   },
-]
+];

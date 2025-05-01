@@ -1,13 +1,18 @@
-//lib/db/db.ts
-
-import { config } from 'dotenv';
-
-// Explicitly load .env.local file
-config({ path: '.env.local' });
-
+// lib/db/db.ts
 import mysql from 'mysql2/promise';
 
 export async function createConnection() {
-  console.log('DATABASE_URL:', process.env.DATABASE_URL);
-  return mysql.createConnection(process.env.DATABASE_URL!);
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'finance_tracker',
+    });
+    console.log('✅ Connected to MySQL database');
+    return connection;
+  } catch (error) {
+    console.error('❌ Error connecting to MySQL:', error);
+    throw error;
+  }
 }
