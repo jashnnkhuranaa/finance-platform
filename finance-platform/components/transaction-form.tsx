@@ -1,3 +1,4 @@
+
 // components/transaction-form.tsx
 'use client';
 
@@ -18,6 +19,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
+// Define Account interface based on actual data structure
+interface Account {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
 const formSchema = z.object({
   date: z.date({ required_error: 'Date is required' }),
   accountId: z.string().min(1, 'Account is required'),
@@ -29,9 +37,10 @@ const formSchema = z.object({
 
 interface TransactionFormProps {
   onSuccess: () => void;
+  defaultValues?: Partial<z.infer<typeof formSchema>>;
 }
 
-export function TransactionForm({ onSuccess }: TransactionFormProps) {
+export function TransactionForm({ onSuccess, defaultValues }: TransactionFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,6 +50,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
       payee: '',
       amount: 0,
       notes: '',
+      ...defaultValues,
     },
   });
 
@@ -120,14 +130,14 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Account</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select an account" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {accounts.map((account) => (
+                  {accounts.map((account: Account) => (
                     <SelectItem key={account.id} value={account.id}>
                       {account.name}
                     </SelectItem>
@@ -146,7 +156,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
