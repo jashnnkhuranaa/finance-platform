@@ -1,4 +1,3 @@
-
 // components/transaction-form.tsx
 'use client';
 
@@ -26,7 +25,7 @@ interface Account {
   created_at: string;
 }
 
-const formSchema = z.object({
+export const formSchema = z.object({
   date: z.date({ required_error: 'Date is required' }),
   accountId: z.string().min(1, 'Account is required'),
   categoryId: z.string().min(1, 'Category is required'),
@@ -35,13 +34,15 @@ const formSchema = z.object({
   notes: z.string().optional(),
 });
 
+type TransactionFormValues = z.infer<typeof formSchema>;
+
 interface TransactionFormProps {
   onSuccess: () => void;
-  defaultValues?: Partial<z.infer<typeof formSchema>>;
+  defaultValues?: Partial<TransactionFormValues>;
 }
 
 export function TransactionForm({ onSuccess, defaultValues }: TransactionFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<TransactionFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: new Date(),
@@ -57,7 +58,7 @@ export function TransactionForm({ onSuccess, defaultValues }: TransactionFormPro
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: TransactionFormValues) => {
     const formData = new FormData();
     formData.append('date', values.date.toISOString());
     formData.append('accountId', values.accountId);
@@ -230,7 +231,7 @@ export function TransactionForm({ onSuccess, defaultValues }: TransactionFormPro
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Input placeholder="Optional notes" {...field} value={field.value ?? ''} />
+                <Input placeholder="Optional notes" {...field} value={field.value || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>

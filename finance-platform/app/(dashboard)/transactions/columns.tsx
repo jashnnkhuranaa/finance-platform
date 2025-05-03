@@ -64,6 +64,7 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => row.original.categoryId || 'N/A',
   },
   {
+    id: 'payee',
     accessorKey: 'payee',
     header: 'Payee',
   },

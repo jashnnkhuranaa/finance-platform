@@ -1,4 +1,4 @@
-// hooks/use-new-account.ts
+// app/api/accounts/hooks/use-new-account.tsx
 import { create } from 'zustand';
 
 type NewAccountState = {

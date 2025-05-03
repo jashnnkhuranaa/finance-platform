@@ -1,18 +1,16 @@
 // components/accounts/data-table.tsx
 'use client';
 
-import * as React from 'react';
 import {
   ColumnDef,
-  SortingState,
-  Row,
   flexRender,
-  ColumnFiltersState,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
+  getPaginationRowModel,
+  SortingState,
+  getSortedRowModel,
+  ColumnFiltersState,
+  getFilteredRowModel,
 } from '@tanstack/react-table';
 
 import {
@@ -26,12 +24,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash } from 'lucide-react';
+import { useState } from 'react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  onDelete?: (rows: Row<TData>[]) => void;
-  disabled?: boolean;
+  onDelete: (rows: any) => void;
+  disabled: boolean;
+  filterColumn?: string; // Dynamic filter column
 }
 
 export function DataTable<TData, TValue>({
@@ -39,10 +39,11 @@ export function DataTable<TData, TValue>({
   data,
   onDelete,
   disabled,
+  filterColumn,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
     data,
@@ -61,41 +62,45 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const handleDelete = () => {
-    if (onDelete) {
-      const selectedRows = table.getFilteredSelectedRowModel().rows;
-      onDelete(selectedRows);
-      table.resetRowSelection();
-    }
-  };
+  // Debug: Log all column IDs
+  console.log('Table Columns:', table.getAllColumns().map(col => col.id));
 
   return (
-    <div>
-      <div className='flex items-center py-4'>
-        <Input
-          placeholder='Search name'
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
-          }
-          className='max-w-sm'
-        />
+    <div className="px-6">
+      <div className="flex items-center py-4">
+        {filterColumn && table.getColumn(filterColumn) ? (
+          <Input
+            placeholder={`Search ${filterColumn}`}
+            value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn(filterColumn)?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm mr-4"
+          />
+        ) : filterColumn ? (
+          <p className="text-red-600">{filterColumn} column not found</p>
+        ) : null}
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <Button
+            disabled={disabled}
+            size={'sm'}
+            variant={'destructive'}
+            onClick={() => {
+              const confirmed = window.confirm(
+                `Are you sure? You are about to delete ${table.getFilteredSelectedRowModel().rows.length} item(s).`
+              );
+              if (confirmed) {
+                onDelete(table.getFilteredSelectedRowModel().rows);
+                table.resetRowSelection();
+              }
+            }}
+          >
+            <Trash className="size-4 mr-2" />
+            Delete ({table.getFilteredSelectedRowModel().rows.length})
+          </Button>
+        )}
       </div>
-
-      {table.getRowModel().rows.length > 0 && (
-        <Button
-          disabled={disabled || table.getFilteredSelectedRowModel().rows.length === 0}
-          size='sm'
-          variant='outline'
-          onClick={handleDelete}
-          className='ml-auto font-normal text-xs'
-        >
-          <Trash className='size-4 mr-2' />
-          Delete ({table.getFilteredSelectedRowModel().rows.length})
-        </Button>
-      )}
-
-      <div className='rounded-md border'>
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -122,43 +127,45 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  No categories found.
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-
-      <div className='flex items-center justify-end space-x-2 py-4'>
-        <div className='flex-1 text-sm text-muted-foreground'>
-          {table.getFilteredSelectedRowModel().rows.length} of{' '}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
         <Button
-          variant='outline'
-          size='sm'
+          variant="outline"
+          size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           Previous
         </Button>
         <Button
-          variant='outline'
-          size='sm'
+          variant="outline"
+          size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           Next
         </Button>
+      </div>
+      <div className="flex-1 text-sm text-muted-foreground">
+        {table.getFilteredSelectedRowModel().rows.length} of{' '}
+        {table.getFilteredRowModel().rows.length} row(s) selected.
       </div>
     </div>
   );
