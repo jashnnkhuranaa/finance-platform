@@ -1,4 +1,4 @@
-//navigation.jsx
+// components/navigation.jsx
 'use client'
 
 import { useState } from "react"

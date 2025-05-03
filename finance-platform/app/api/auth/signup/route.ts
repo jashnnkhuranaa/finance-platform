@@ -1,3 +1,5 @@
+//app/api/auth/signup/route.ts
+
 import { NextResponse } from 'next/server';
 import { createUser } from '@/lib/db/users';
 import { getUserByEmail } from '@/lib/db/users';

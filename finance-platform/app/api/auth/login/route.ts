@@ -1,3 +1,5 @@
+//app/api/auth/login/route.ts
+
 import { NextResponse } from 'next/server';
 import { getUserByEmail } from '@/lib/db/users';
 import bcrypt from 'bcryptjs';
