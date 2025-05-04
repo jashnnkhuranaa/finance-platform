@@ -1,6 +1,4 @@
-// lib/auth/jwt.ts
-
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 
@@ -8,33 +6,53 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 import { cookies } from 'next/headers';
 
+// Define the expected payload structure
+interface TokenPayload {
+  id: string;
+  userId: string; // Add userId to the payload
+  role: string;
+  iat?: number;
+  exp?: number;
+}
+
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access-secret';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret';
 
-export const signAccessToken = (payload: object) => {
-  return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+export const signAccessToken = (payload: { id: string; role: string }) => {
+  return jwt.sign({ ...payload, userId: payload.id }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 };
 
-export const signRefreshToken = (payload: object) => {
-  return jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+export const signRefreshToken = (payload: { id: string; role: string }) => {
+  return jwt.sign({ ...payload, userId: payload.id }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 };
 
-export const verifyAccessToken = (token: string): { id: string; role: string } => {
-  const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as { id: string; role: string };
-  return decoded;
+export const verifyAccessToken = (token: string): TokenPayload | null => {
+  try {
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET) as TokenPayload;
+    return decoded;
+  } catch (error) {
+    console.error('❌ Access token verification error:', error);
+    return null;
+  }
 };
 
-export const verifyRefreshToken = (token: string) => {
-  return jwt.verify(token, REFRESH_TOKEN_SECRET);
+export const verifyRefreshToken = (token: string): TokenPayload | null => {
+  try {
+    const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET) as TokenPayload;
+    return decoded;
+  } catch (error) {
+    console.error('❌ Refresh token verification error:', error);
+    return null;
+  }
 };
 
-// setting auth cookies both access and refresh tokens
+// Setting auth cookies both access and refresh tokens
 export const setAuthCookies = (res: NextResponse, accessToken: string, refreshToken: string) => {
   res.cookies.set('accessToken', accessToken, {
     httpOnly: true,
     secure: true,
     path: '/',
-    maxAge: 60 * 15, // 15 minutes
+    maxAge: 60 * 30, // 30 minutes
   });
 
   res.cookies.set('refreshToken', refreshToken, {

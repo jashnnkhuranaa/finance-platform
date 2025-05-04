@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "react-date-range/dist/styles.css"; /* Add this line for date picker styles */
+@import "react-date-range/dist/theme/default.css"; /* Add this line for date picker theme */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -120,11 +122,16 @@
     @apply bg-background text-foreground;
   }
 }
-/* globals.css */
 
 html,
 body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* Prevents scrolling */
+  overflow: auto;
+}
+
+#__next {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }

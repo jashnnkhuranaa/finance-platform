@@ -1,3 +1,5 @@
+//lib/db/schema.ts
+
 import { createConnection } from './db';
 
 async function createTables() {
