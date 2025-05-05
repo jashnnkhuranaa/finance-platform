@@ -1,3 +1,5 @@
+//app/api/auth/check/route.ts
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@/lib/auth/jwt';

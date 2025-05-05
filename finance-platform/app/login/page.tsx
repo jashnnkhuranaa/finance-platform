@@ -2,109 +2,120 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { toast, Toaster } from 'react-hot-toast';
-import { AuthResponse } from '@/types/auth';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function LoginPage() {
+const LoginPage = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(''); // Explicitly type as string | null
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  // Check auth status on mount
+  // Check authentication status on mount
   useEffect(() => {
     const checkAuth = async () => {
-      const res = await fetch('/api/auth/check', { credentials: 'include' });
-      const data: { isAuthenticated: boolean } = await res.json();
-      if (data.isAuthenticated) {
-        setIsAuthenticated(true);
-        router.push('/overview');
+      try {
+        const res = await fetch('/api/auth/check', {
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+        const data: { isAuthenticated: boolean } = await res.json();
+        console.log('Login Page Auth Check Response:', data);
+        setIsAuthenticated(data.isAuthenticated);
+        if (data.isAuthenticated) {
+          console.log('User already authenticated, redirecting to /overview');
+          router.push('/overview');
+          router.refresh();
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+        setIsAuthenticated(false);
       }
     };
     checkAuth();
   }, [router]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null); // Reset error to null
+    setLoading(true);
+    setError(null);
 
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-      credentials: 'include',
-    });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
 
-    if (res.ok) {
-      toast.success('Login successful!');
-      setTimeout(async () => {
-        const authRes = await fetch('/api/auth/check', { credentials: 'include' });
-        const authData: { isAuthenticated: boolean } = await authRes.json();
-        if (authData.isAuthenticated) {
-          setIsAuthenticated(true);
-          router.push('/overview');
-        } else {
-          setError('Authentication failed after login');
-          toast.error('Authentication failed after login');
-        }
-      }, 500);
-    } else {
-      const data: AuthResponse = await res.json();
-      const errorMessage = data.error ?? 'Login failed'; // Convert undefined/null to string
-      setError(errorMessage);
-      toast.error(`Login failed: ${errorMessage}`);
+      const data = await res.json();
+      console.log('Login Response:', data);
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      console.log('Redirecting to /overview');
+      router.push('/overview');
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
     }
   };
 
+  if (isAuthenticated === null) {
+    return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return null; // Redirect handled in useEffect
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">Login to Fineance</h1>
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-            Log In
-          </Button>
-          {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
-        </form>
-        <p className="mt-4 text-center text-sm">
-          Don’t have an account?{' '}
-          <a href="/signup" className="text-blue-600 hover:underline">
-            Sign up
-          </a>
-        </p>
-      </div>
+    <div className="min-h-screen flex justify-center items-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-red-600 mb-4">{error}</p>}
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default LoginPage;

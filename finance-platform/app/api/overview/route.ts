@@ -1,105 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@/lib/auth/jwt';
-import { createConnection } from '@/lib/db/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the access token from cookies
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken')?.value;
+    // Extract access token from cookies
+    const accessToken = request.cookies.get('accessToken')?.value;
+    console.log('Access Token:', accessToken);
 
     if (!accessToken) {
-      console.log('No access token found in cookies');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'No access token provided' }, { status: 401 });
     }
 
     // Verify the token and extract userId
     const decodedToken = verifyAccessToken(accessToken);
-    const userId = (decodedToken as any).sub || (decodedToken as any).userId; // Adjust based on your token payload
+    console.log('Decoded Token:', decodedToken);
+
+    if (!decodedToken) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+
+    const userId = decodedToken.userId;
     console.log('Decoded User ID:', userId);
 
     if (!userId) {
-      console.log('User ID not found in token');
-      return NextResponse.json({ error: 'Invalid token payload' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid token: userId not found' }, { status: 401 });
     }
 
-    // Get query params for date range
+    // Extract query parameters (startDate and endDate)
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
-    console.log('Date Range:', { startDate, endDate });
 
-    let connection;
-    try {
-      connection = await createConnection();
-
-      // Fetch accounts
-      const [accountsResult] = await connection.query(
-        'SELECT * FROM accounts WHERE userId = ?',
-        [userId]
-      );
-      const accounts = Array.isArray(accountsResult) ? accountsResult : [];
-      console.log('Fetched Accounts:', accounts);
-
-      // Fetch transactions within the date range
-      let transactionsQuery = 'SELECT * FROM transactions WHERE userId = ?';
-      const queryParams: any[] = [userId];
-
-      if (startDate && endDate) {
-        transactionsQuery += ' AND DATE(date) BETWEEN ? AND ?';
-        queryParams.push(startDate, endDate);
-      }
-
-      const [transactionsResult] = await connection.query(
-        transactionsQuery,
-        queryParams
-      );
-      const transactions = Array.isArray(transactionsResult) ? transactionsResult : [];
-      console.log('Fetched Transactions:', transactions);
-
-      // Fetch categories
-      const [categoriesResult] = await connection.query(
-        'SELECT * FROM categories WHERE userId = ?',
-        [userId]
-      );
-      const categories = Array.isArray(categoriesResult) ? categoriesResult : [];
-      console.log('Fetched Categories:', categories);
-
-      // If no transactions, log and proceed
-      if (!transactions || transactions.length === 0) {
-        console.log('No transactions found for user');
-      }
-
-      // Calculate remaining, income, and expenses
-      const income = transactions
-        .filter((t: any) => t.amount >= 0)
-        .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
-
-      const expenses = transactions
-        .filter((t: any) => t.amount < 0)
-        .reduce((sum: number, t: any) => sum + Math.abs(Number(t.amount)), 0);
-
-      const remaining = income - expenses;
-
-      console.log('Calculated Values:', { remaining, income, expenses });
-
-      return NextResponse.json({
-        remaining,
-        income,
-        expenses,
-        transactions,
-        categories,
-        accounts,
-      });
-    } finally {
-      if (connection) {
-        await connection.end();
-        console.log('Database connection closed');
-      }
+    if (!startDate || !endDate) {
+      return NextResponse.json({ error: 'Missing date range' }, { status: 400 });
     }
+
+    // Fetch data for the user
+    const overviewData = await fetchOverviewData(userId, startDate, endDate);
+
+    return NextResponse.json(overviewData, { status: 200 });
   } catch (error) {
     console.error('Error fetching overview data:', error);
-    return NextResponse.json({ error: 'Unauthorized or invalid token' }, { status: 401 });
+    return NextResponse.json({ error: 'Failed to fetch overview data' }, { status: 500 });
   }
+}
+
+async function fetchOverviewData(userId: string, startDate: string, endDate: string) {
+  // Example: Fetch data from database (replace with actual logic)
+  return {
+    remaining: 500,
+    income: 800,
+    expenses: 300,
+    transactions: [
+      { id: "1", date: "2025-05-05", accountId: "1", categoryId: "1", payee: "Payee 1", amount: -200, notes: null, created_at: "2025-05-05" },
+      { id: "2", date: "2025-05-06", accountId: "1", categoryId: "2", payee: "Payee 2", amount: -100, notes: null, created_at: "2025-05-06" },
+      { id: "3", date: "2025-05-07", accountId: "1", categoryId: "3", payee: "Salary", amount: 500, notes: null, created_at: "2025-05-07" },
+      { id: "4", date: "2025-05-08", accountId: "1", categoryId: "3", payee: "Freelance", amount: 300, notes: null, created_at: "2025-05-08" },
+    ],
+    categories: [
+      { id: "1", name: "Loan", created_at: "2025-05-01" },
+      { id: "2", name: "Bank Fees", created_at: "2025-05-01" },
+      { id: "3", name: "Income", created_at: "2025-05-01" },
+    ],
+  };
 }

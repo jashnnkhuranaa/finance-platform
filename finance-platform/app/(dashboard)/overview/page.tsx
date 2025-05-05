@@ -12,7 +12,16 @@ import { OverviewResponse, OverviewData } from '@/types/auth';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { ChevronDown } from 'lucide-react';
 import { DateRange } from 'react-date-range';
-import { addDays, format } from 'date-fns';
+import { format } from 'date-fns';
+
+// Import Components
+import AggregateTransactions from '@/components/AggregateTransaction';
+import ForecastData from '@/components/ForecastData';
+import BudgetSuggestions from '@/components/BudgetSuggestions';
+import SpendingAlerts from '@/components/SpendingAlerts';
+import Insights from '@/components/Insights';
+import SavingsGoal from '@/components/SavingsGoal';
+import CustomTooltip from '@/components/CustomTooltip';
 
 const getOverviewData = async (startDate: string, endDate: string): Promise<OverviewResponse> => {
   const res = await fetch(`/api/overview?startDate=${startDate}&endDate=${endDate}`, {
@@ -30,95 +39,6 @@ const getOverviewData = async (startDate: string, endDate: string): Promise<Over
   const data = await res.json();
   console.log('API Response Data:', data);
   return data;
-};
-
-// Helper function to format dates to "MMM D"
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-};
-
-// Helper function to aggregate transactions by date
-const aggregateTransactionsByDate = (transactions: any[], startDate: Date, endDate: Date) => {
-  const aggregated: { [key: string]: { date: string; income: number; expenses: number } } = {};
-
-  console.log('Transactions before filtering:', transactions);
-  console.log('Start Date:', startDate.toISOString());
-  console.log('End Date:', endDate.toISOString());
-
-  transactions
-    .filter((t) => {
-      const transactionDate = new Date(t.date);
-      // Normalize dates to ignore time part
-      transactionDate.setHours(0, 0, 0, 0);
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-
-      const isWithinRange = transactionDate >= startDate && transactionDate <= endDate;
-      console.log(`Transaction Date: ${t.date}, Normalized: ${transactionDate.toISOString()}, Start: ${startDate.toISOString()}, End: ${endDate.toISOString()}, Within Range: ${isWithinRange}`);
-      return isWithinRange;
-    })
-    .forEach((t) => {
-      const date = formatDate(t.date);
-      if (!aggregated[date]) {
-        aggregated[date] = { date, income: 0, expenses: 0 };
-      }
-      if (t.amount >= 0) {
-        aggregated[date].income += Number(t.amount);
-      } else {
-        aggregated[date].expenses += Math.abs(Number(t.amount));
-      }
-    });
-
-  const result = Object.values(aggregated).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  console.log('Aggregated Chart Data:', result);
-  return result;
-};
-
-// Helper function to generate forecast data
-const generateForecastData = (transactions: any[]) => {
-  // Calculate average daily income and expenses
-  const incomeTransactions = transactions.filter((t) => t.amount >= 0);
-  const expenseTransactions = transactions.filter((t) => t.amount < 0);
-
-  const totalIncome = incomeTransactions.reduce((sum: number, t: any) => sum + Number(t.amount), 0);
-  const totalExpenses = expenseTransactions.reduce((sum: number, t: any) => sum + Math.abs(Number(t.amount)), 0);
-
-  const daysWithTransactions = new Set(transactions.map((t) => formatDate(t.date))).size;
-  const avgDailyIncome = daysWithTransactions > 0 ? totalIncome / daysWithTransactions : 0;
-  const avgDailyExpenses = daysWithTransactions > 0 ? totalExpenses / daysWithTransactions : 0;
-
-  // Generate forecast for the next 7 days
-  const forecastData = [];
-  const today = new Date();
-  for (let i = 1; i <= 7; i++) {
-    const forecastDate = addDays(today, i);
-    forecastData.push({
-      date: formatDate(forecastDate.toISOString()),
-      income: avgDailyIncome,
-      expenses: avgDailyExpenses,
-    });
-  }
-
-  console.log('Forecast Data:', forecastData);
-  return forecastData;
-};
-
-// Custom Tooltip for Area Chart
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white p-2 border border-gray-300 rounded shadow">
-        <p className="font-bold">{`Date: ${label}`}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} style={{ color: entry.stroke }}>
-            {`${entry.name}: $${entry.value.toFixed(2)}`}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
 };
 
 const OverviewPage = () => {
@@ -149,21 +69,18 @@ const OverviewPage = () => {
           },
         });
         const data: { isAuthenticated: boolean } = await res.json();
-        console.log('Auth Check Response:', data);
+        console.log('Overview Page Auth Check Response:', data);
         setIsAuthenticated(data.isAuthenticated);
-        if (!data.isAuthenticated) {
-          router.push('/login');
-        }
+        // Middleware handles redirect to /login if not authenticated
       } catch (err) {
         console.error('Auth check error:', err);
         setIsAuthenticated(false);
-        router.push('/login');
       } finally {
         setLoading(false);
       }
     };
     checkAuth();
-  }, [router]);
+  }, []);
 
   // Fetch overview data based on date range
   useEffect(() => {
@@ -192,7 +109,7 @@ const OverviewPage = () => {
   }
 
   if (!isAuthenticated) {
-    return null; // Redirect handled in useEffect
+    return null; // Middleware handles redirect to /login
   }
 
   if (error) {
@@ -205,8 +122,8 @@ const OverviewPage = () => {
 
   const { remaining, income, expenses, transactions, categories } = overviewData;
 
-  const chartData = aggregateTransactionsByDate(transactions, dateRange[0].startDate, dateRange[0].endDate);
-  const forecastData = generateForecastData(transactions);
+  const chartData = AggregateTransactions(transactions, dateRange[0].startDate, dateRange[0].endDate);
+  const forecastData = ForecastData(transactions);
 
   const expensesByCategory = categories.map((category: any) => {
     const categoryTransactions = transactions.filter(
@@ -231,7 +148,7 @@ const OverviewPage = () => {
   return (
     <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card className="border-none drop-shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Remaining</CardTitle>
@@ -333,9 +250,11 @@ const OverviewPage = () => {
             </p>
           </CardContent>
         </Card>
+
+        <SavingsGoal remaining={remaining} />
       </div>
 
-      {/* Charts */}
+      {/* Charts and Features */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Area Chart: Transactions Over Time */}
         <Card className="border-none drop-shadow-sm">
@@ -477,6 +396,10 @@ const OverviewPage = () => {
             )}
           </CardContent>
         </Card>
+
+        <BudgetSuggestions transactions={transactions} categories={categories} startDate={dateRange[0].startDate} endDate={dateRange[0].endDate} />
+        <SpendingAlerts transactions={transactions} categories={categories} startDate={dateRange[0].startDate} endDate={dateRange[0].endDate} />
+        <Insights transactions={transactions} categories={categories} startDate={dateRange[0].startDate} endDate={dateRange[0].endDate} />
       </div>
     </div>
   );
