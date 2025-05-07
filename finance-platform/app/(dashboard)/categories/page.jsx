@@ -1,3 +1,4 @@
+// app/(dashboard)/categories/page.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -5,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useCategories } from '@/hooks/useCategories';
 import { useNewAccount } from '@/app/api/accounts/hooks/use-new-account';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import  Button  from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import  DataTable  from '@/components/accounts/data-table';
+import DataTable from '@/components/accounts/data-table';
 import { toast } from 'react-toastify';
 import { deleteCategories } from '@/app/api/categories/actions/delete-category';
 import columns from '@/app/(dashboard)/categories/columns';
@@ -18,7 +19,7 @@ const CategoriesPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
   const { data = [], isLoading, error, refetch } = useCategories();
-  const { isOpen, onOpen } = useNewAccount();
+  const { isOpen, onOpen, type } = useNewAccount();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -110,7 +111,7 @@ const CategoriesPage = () => {
           )}
         </CardContent>
       </Card>
-      <NewAccountSheet type="category" />
+      {type === 'category' && <NewAccountSheet type="category" />}
     </div>
   );
 };

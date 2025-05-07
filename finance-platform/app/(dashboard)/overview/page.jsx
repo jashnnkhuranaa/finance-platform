@@ -63,7 +63,7 @@ const OverviewPage = () => {
         if (data.isAuthenticated === false || typeof data.isAuthenticated === 'undefined') {
           console.log('Overview: Not authenticated, redirecting to /login');
           setIsAuthenticated(false);
-          router.replace('/login'); // Use replace instead of push to prevent back navigation
+          router.replace('/login');
         } else {
           console.log('Overview: User is authenticated');
           setIsAuthenticated(true);
@@ -79,13 +79,11 @@ const OverviewPage = () => {
     checkAuth();
   }, [router]);
 
-  // If loading, show loading screen
   if (loading || isAuthenticated === null) {
     console.log('Overview: Loading state, showing loading screen');
     return <div className="min-h-screen flex justify-center items-center">Loading...</div>;
   }
 
-  // If not authenticated, redirect to login (this should already be handled by useEffect, but adding as a safeguard)
   if (!isAuthenticated) {
     console.log('Overview: Not authenticated, should redirect (safeguard)');
     router.replace('/login');
@@ -106,13 +104,11 @@ const OverviewPage = () => {
     return <div className="min-h-screen flex justify-center items-center">Loading data...</div>;
   }
 
-  // Filter transactions based on selected date range
   const filteredTransactions = transactions.filter((t) => {
     const txDate = new Date(t.date);
     return txDate >= dateRange[0].startDate && txDate <= dateRange[0].endDate;
   });
 
-  // Calculate remaining, income, expenses for current period
   const income = filteredTransactions
     .filter((t) => t.amount >= 0)
     .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -123,7 +119,6 @@ const OverviewPage = () => {
 
   const remaining = income - expenses;
 
-  // Calculate changes from previous period
   const currentStartDate = new Date(dateRange[0].startDate);
   const currentEndDate = new Date(dateRange[0].endDate);
   const prevStartDate = subMonths(currentStartDate, 1);
@@ -149,7 +144,6 @@ const OverviewPage = () => {
   const incomeChange = hasPreviousData && prevIncome !== 0 ? ((income - prevIncome) / prevIncome) * 100 : 0;
   const expensesChange = hasPreviousData && prevExpenses !== 0 ? ((expenses - prevExpenses) / prevExpenses) * 100 : 0;
 
-  // Prepare data for charts
   const chartData = AggregateTransactions(filteredTransactions, dateRange[0].startDate, dateRange[0].endDate);
 
   const expensesByCategory = categories.map((category) => {
@@ -171,7 +165,7 @@ const OverviewPage = () => {
   const dateRangeText = `${format(dateRange[0].startDate, 'MMM d')} - ${format(dateRange[0].endDate, 'MMM d, yyyy')}`;
 
   return (
-    <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
+    <div className="w-full pb-10 -mt-24">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card className="border-none drop-shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -296,7 +290,7 @@ const OverviewPage = () => {
         <SavingsGoal remaining={remaining} currency="₹" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
         <Card className="border-none drop-shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Transactions</CardTitle>
@@ -385,7 +379,10 @@ const OverviewPage = () => {
             )}
           </CardContent>
         </Card>
-        <BudgetTracker/>
+
+        <div className="lg:col-span-2">
+          <BudgetTracker />
+        </div>
 
         <Card className="border-none drop-shadow-sm lg:col-span-2">
           <CardHeader>

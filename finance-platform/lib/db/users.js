@@ -1,4 +1,3 @@
-// lib/db/users.js
 const { createConnection } = require("./db");
 
 async function getUserByEmail(email) {
@@ -11,7 +10,24 @@ async function getUserByEmail(email) {
     const users = rows;
     return users[0] ? users[0] : null;
   } catch (error) {
-    console.error("❌ Error fetching user:", error);
+    console.error("❌ Error fetching user by email:", error);
+    return null;
+  } finally {
+    await conn.end();
+  }
+}
+
+async function getUserById(id) {
+  const conn = await createConnection();
+  try {
+    const [rows] = await conn.execute(
+      "SELECT id, email, password, role, plaidId FROM users WHERE id = ?",
+      [id]
+    );
+    const users = rows;
+    return users[0] ? users[0] : null;
+  } catch (error) {
+    console.error("❌ Error fetching user by ID:", error);
     return null;
   } finally {
     await conn.end();
@@ -39,4 +55,4 @@ function generateId() {
   return Math.random().toString(36).slice(2);
 }
 
-export { getUserByEmail, createUser };
+export { getUserByEmail, getUserById, createUser };

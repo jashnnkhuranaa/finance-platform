@@ -1,45 +1,72 @@
-"use strict";
-// app/api/auth/me/route.js
-
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@/lib/auth/jwt";
-import { users } from "@/lib/db/users";
-import { NextResponse } from "next/server";
+import { getUserById } from "@/lib/db/users";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-
-  if (!accessToken) {
-    return NextResponse.json(
-      { error: "Access token missing" },
-      { status: 401 }
-    );
-  }
-
   try {
-    // Get the decoded token from the verifyAccessToken function
-    const payload = verifyAccessToken(accessToken);
+    const cookieStore = await cookies();
+    const token = cookieStore.get("accessToken")?.value;
 
-    // Type guard to check if the decoded payload is a valid JwtPayload
-    if (typeof payload !== "string" && "id" in payload && "role" in payload) {
-      // Now it's safe to access payload.id and payload.role
-      const user = users.find((u) => u.id === payload.id);
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-      return NextResponse.json({
-        id: user.id,
-        email: user.email,
-        role: user.role,
+    if (!token) {
+      console.log("Auth/Me: No access token found in cookies");
+      return new Response(JSON.stringify({ error: "No access token found" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
       });
-    } else {
-      return NextResponse.json({ error: "Invalid token" }, { status: 403 });
     }
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Invalid or expired access token" },
-      { status: 403 }
+
+    // Verify the access token
+    const verifiedPayload = verifyAccessToken(token);
+    if (verifiedPayload?.error) {
+      console.log(
+        `Auth/Me: Token verification failed (${verifiedPayload.error})`
+      );
+      const response = new Response(
+        JSON.stringify({ error: verifiedPayload.error }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      response.headers.append(
+        "Set-Cookie",
+        "accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      );
+      return response;
+    }
+
+    console.log("Auth/Me: Fetching user with ID:", verifiedPayload.id);
+    const user = await getUserById(verifiedPayload.id);
+    if (!user) {
+      console.log("Auth/Me: User not found for ID:", verifiedPayload.id);
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("Auth/Me: User email fetched successfully:", user.email);
+    return new Response(JSON.stringify({ email: user.email }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error in /api/auth/me:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    const response = new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
+    response.headers.append(
+      "Set-Cookie",
+      "accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+    );
+    return response;
   }
 }

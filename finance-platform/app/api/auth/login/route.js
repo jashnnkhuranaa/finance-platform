@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/db/users";
 import bcrypt from "bcryptjs";
-import {
-  signAccessToken,
-  signRefreshToken,
-  setAuthCookies,
-} from "@/lib/auth/jwt";
+import { signAccessToken, setAuthCookies } from "@/lib/auth/jwt";
 
 export async function POST(req) {
   try {
@@ -35,16 +31,15 @@ export async function POST(req) {
     }
 
     const accessToken = signAccessToken({ id: user.id, role: user.role });
-    const refreshToken = signRefreshToken({ id: user.id });
 
-    console.log("Login Success: Tokens generated", { userId: user.id });
+    console.log("Login Success: Token generated", { userId: user.id });
 
     const res = NextResponse.json({
       message: "Login successful",
       user: { id: user.id, email: user.email, role: user.role },
     });
 
-    return setAuthCookies(res, accessToken, refreshToken);
+    return setAuthCookies(res, accessToken);
   } catch (error) {
     console.error("❌ Login error:", error.message);
     return NextResponse.json(

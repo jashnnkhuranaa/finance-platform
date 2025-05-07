@@ -1,10 +1,11 @@
+// app/(dashboard)/accounts/page.js
 'use client';
 
 import React, { useEffect } from "react";
 import { useNewAccount } from "@/app/api/accounts/hooks/use-new-account";
 import NewAccountSheet from "@/components/NewAccountSheet";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import  Button  from "@/components/ui/button";
+import Button from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import columns from "@/app/(dashboard)/accounts/columns";
 import DataTable from "@/components/accounts/data-table";
@@ -14,7 +15,7 @@ import { toast } from "react-toastify";
 
 const AccountsPage = () => {
   const { data = [], isLoading, error, refetch } = useAccounts();
-  const { isOpen, onOpen } = useNewAccount();
+  const { isOpen, onOpen, type } = useNewAccount();
 
   useEffect(() => {
     if (!isOpen) {
@@ -45,7 +46,7 @@ const AccountsPage = () => {
         <CardHeader className="border-none px-6">
           <div className="flex w-full items-center justify-between">
             <CardTitle className="text-xl">Accounts</CardTitle>
-            <Button size="sm" onClick={onOpen}>
+            <Button size="sm" onClick={() => onOpen('account')}>
               <Plus className="size-4 mr-2" />
               Add Account
             </Button>
@@ -70,7 +71,7 @@ const AccountsPage = () => {
           )}
         </CardContent>
       </Card>
-      <NewAccountSheet type="account" />
+      {type === 'account' && <NewAccountSheet type="account" />}
     </div>
   );
 };

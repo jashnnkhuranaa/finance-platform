@@ -10,7 +10,7 @@ const nextConfig = {
   },
 
   // Enable SWC minification for better performance
-  swcMinify: true,
+  // swcMinify: true,
 
   // Optional: Add image domains if you're using next/image
   images: {
