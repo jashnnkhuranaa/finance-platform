@@ -148,7 +148,4 @@ cron.schedule("0 0 1 * *", () => {
   generateMonthlyReports();
 });
 
-// Run immediately for testing
-generateMonthlyReports();
-
 export { generateMonthlyReports };
