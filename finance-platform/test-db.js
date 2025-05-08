@@ -1,6 +1,8 @@
 // test-db.js
 import dotenv from "dotenv";
+
 dotenv.config({ path: ".env.local" });
+
 import { createConnection } from "./lib/db/db.js";
 
 async function test() {
