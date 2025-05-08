@@ -1,11 +1,16 @@
 /** @type {import('next').NextConfig} */
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const nextConfig = {
   // Enable React Strict Mode for better error detection
   reactStrictMode: true,
 
   // Define path aliases to match jsconfig.json
   webpack(config) {
-    config.resolve.alias["@"] = require("path").resolve(__dirname);
+    config.resolve.alias["@"] = resolve(__dirname);
     return config;
   },
 
@@ -18,4 +23,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

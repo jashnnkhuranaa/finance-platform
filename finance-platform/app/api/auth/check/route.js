@@ -5,6 +5,7 @@ import { verifyAccessToken } from "@/lib/auth/jwt";
 
 export async function GET() {
   try {
+    console.log("Starting /api/auth/check request");
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
 
@@ -15,10 +16,9 @@ export async function GET() {
       return NextResponse.json({ isAuthenticated: false }, { status: 401 });
     }
 
-    // Verify the access token
     const payload = verifyAccessToken(accessToken);
     if (!payload || typeof payload === "string" || !("id" in payload)) {
-      console.log("Auth Check: Token verification failed");
+      console.log("Auth Check: Token verification failed, payload:", payload);
       const response = NextResponse.json(
         { isAuthenticated: false },
         { status: 401 }
@@ -38,4 +38,12 @@ export async function GET() {
     response.cookies.delete("accessToken");
     return response;
   }
+}
+
+// Handle other methods (to avoid 405)
+export async function POST() {
+  return NextResponse.json(
+    { error: "Method Not Allowed" },
+    { status: 405 }
+  );
 }
