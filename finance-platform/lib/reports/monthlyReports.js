@@ -4,6 +4,7 @@ dotenv.config({ path: ".env.local" });
 import { createConnection } from "../db/db.js";
 import cron from "node-cron";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+ //new comment added //new comment added
 import { sendEmail } from "../utils/send-email.js";
 
 // Generate AI-driven financial insights

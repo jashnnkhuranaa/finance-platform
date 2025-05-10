@@ -7,7 +7,6 @@ import { createConnection } from "./lib/db/db.js";
 
 async function test() {
   try {
-     //new comment added //new comment added //new comment added
     const connection = await createConnection();
     console.log("Connection successful!");
     await connection.end();
