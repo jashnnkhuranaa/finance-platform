@@ -6,6 +6,9 @@ import mysql from "mysql2/promise";
 async function createConnection() {
   try {
     // Log environment variables for debugging
+    //new comment added
+     //new comment added
+      //new comment added
     console.log("DB_HOST:", process.env.DB_HOST || "localhost");
     console.log("DB_USER:", process.env.DB_USER || "root");
     console.log("DB_PASSWORD:", process.env.DB_PASSWORD || "NO_PASSWORD");
