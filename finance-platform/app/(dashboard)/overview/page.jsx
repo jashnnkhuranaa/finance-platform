@@ -408,12 +408,10 @@ const OverviewPage = () => {
           currency="₹" 
         />
         <Insights 
-          transactions={filteredTransactions} 
-          categories={categories} 
-          startDate={dateRange[0].startDate} 
-          endDate={dateRange[0].endDate} 
-          currency="₹" 
-        />
+  transactions={filteredTransactions} 
+  categories={categories} 
+  currency="₹" 
+/>
       </div>
     </div>
   );

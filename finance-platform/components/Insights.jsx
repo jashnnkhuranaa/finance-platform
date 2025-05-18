@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils/transaction";
 import { Info, CheckCircle } from "lucide-react";
 
-const Insights = ({ transactions, categories, startDate, endDate, currency = '₹' }) => {
+const Insights = ({ transactions, categories, currency = '₹' }) => {
   const insights = (() => {
     const expensesByCategory = categories.map((category) => {
       const categoryTransactions = transactions.filter(
