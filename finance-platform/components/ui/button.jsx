@@ -45,3 +45,4 @@ function Button({ className, variant, size, asChild = false, ...props }) {
 }
 
 export default Button;
+export { buttonVariants };

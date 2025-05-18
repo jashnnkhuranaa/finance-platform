@@ -1,5 +1,5 @@
 // lib/db/schema.js
-const { createConnection } = require("./db");
+import { createConnection } from "@/lib/db/db";
 
 async function createTables() {
   const connection = await createConnection();

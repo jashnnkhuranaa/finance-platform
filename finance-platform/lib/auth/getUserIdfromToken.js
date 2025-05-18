@@ -1,6 +1,6 @@
 // lib/auth/getUserIdFromToken.js
-const { cookies } = require("next/headers");
-const { verifyAccessToken } = require("./jwt");
+import { cookies } from "next/headers";
+import { verifyAccessToken } from "./jwt";
 
 const getUserIdFromToken = async () => {
   const cookieStore = await cookies();

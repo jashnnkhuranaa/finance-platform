@@ -1,6 +1,6 @@
-const { cookies } = require("next/headers");
-const { verifyAccessToken } = require("../lib/auth/jwt");
-const { createConnection } = require("../lib/db/db");
+import { cookies } from "next/headers";
+import { verifyAccessToken } from "@/lib/auth/jwt";
+import { createConnection } from "@/lib/db/db";
 
 async function getUserIdFromToken() {
   try {

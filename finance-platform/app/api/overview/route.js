@@ -1,6 +1,7 @@
 // app/api/overview/route.js
 import { NextResponse } from "next/server";
 import { verifyAccessToken } from "@/lib/auth/jwt";
+import { createConnection } from "@/lib/db/db";
 
 async function GET(request) {
   try {
@@ -49,58 +50,48 @@ async function GET(request) {
 }
 
 async function fetchOverviewData(userId, startDate, endDate) {
-  return {
-    remaining: 500,
-    income: 800,
-    expenses: 300,
-    transactions: [
-      {
-        id: "1",
-        date: "2025-05-05",
-        accountId: "1",
-        categoryId: "1",
-        payee: "Payee 1",
-        amount: -200,
-        notes: null,
-        created_at: "2025-05-05",
-      },
-      {
-        id: "2",
-        date: "2025-05-06",
-        accountId: "1",
-        categoryId: "2",
-        payee: "Payee 2",
-        amount: -100,
-        notes: null,
-        created_at: "2025-05-06",
-      },
-      {
-        id: "3",
-        date: "2025-05-07",
-        accountId: "1",
-        categoryId: "3",
-        payee: "Salary",
-        amount: 500,
-        notes: null,
-        created_at: "2025-05-07",
-      },
-      {
-        id: "4",
-        date: "2025-05-08",
-        accountId: "1",
-        categoryId: "3",
-        payee: "Freelance",
-        amount: 300,
-        notes: null,
-        created_at: "2025-05-08",
-      },
-    ],
-    categories: [
-      { id: "1", name: "Loan", created_at: "2025-05-01" },
-      { id: "2", name: "Bank Fees", created_at: "2025-05-01" },
-      { id: "3", name: "Income", created_at: "2025-05-01" },
-    ],
-  };
+  try {
+    const conn = await createConnection();
+
+    // Fetch transactions within the date range for the user
+    const [transactions] = await conn.execute(
+      'SELECT id, date, accountId, categoryId, payee, amount, notes, created_at FROM transactions WHERE userId = ? AND date BETWEEN ? AND ?',
+      [userId, startDate, endDate] // Using userId, startDate, endDate
+    );
+
+    // Fetch categories for the user
+    const [categories] = await conn.execute(
+      'SELECT id, name, created_at FROM categories WHERE userId = ?',
+      [userId]
+    );
+
+    // Calculate income, expenses, and remaining
+    let income = 0;
+    let expenses = 0;
+    for (const transaction of transactions) {
+      if (transaction.amount > 0) {
+        income += transaction.amount;
+      } else {
+        expenses += Math.abs(transaction.amount);
+      }
+    }
+    const remaining = income - expenses;
+
+    await conn.end();
+
+    console.log(`✅ Fetched overview data for userId: ${userId}`, { remaining, income, expenses });
+
+    return {
+      remaining,
+      income,
+      expenses,
+      transactions,
+      categories,
+    };
+  } catch (error) {
+    console.error('❌ Error fetching overview data from database:', error);
+    throw error;
+  }
 }
 
 export { GET };

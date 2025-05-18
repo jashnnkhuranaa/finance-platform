@@ -1,6 +1,6 @@
 // lib/accounts/getAccounts.js
-const { createConnection } = require("@/lib/db/db");
-const { getUserIdFromToken } = require("@/lib/auth/getUserIdfromToken");
+import { createConnection } from "@/lib/db/db";
+import { getUserIdFromToken } from "@/lib/auth/getUserIdfromToken";
 
 async function getAccounts() {
   const userId = await getUserIdFromToken();
