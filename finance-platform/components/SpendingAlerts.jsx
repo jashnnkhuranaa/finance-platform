@@ -5,9 +5,6 @@ import { AlertTriangle, CheckCircle } from "lucide-react";
 const SpendingAlerts = ({ transactions = [], categories = [], startDate, endDate, currency = '₹' }) => {
   console.log("SpendingAlerts Props:", { transactions, categories, startDate, endDate });
 
-  const safeStartDate = startDate ? new Date(startDate) : new Date();
-  const safeEndDate = endDate ? new Date(endDate) : new Date();
-
   const spendingAlerts = (() => {
     const expensesByCategory = categories.map((category) => {
       const categoryTransactions = transactions.filter(

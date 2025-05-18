@@ -56,18 +56,24 @@ const ForecastData = ({ transactions = [], currency = '₹', categories = [] }) 
     const cleanIncomeTransactions = removeOutliers(incomeTransactions, 'amount');
     const cleanExpenseTransactions = removeOutliers(expenseTransactions, 'amount');
 
-    // Step 4: Calculate base averages (weighted by recency)
+    // Step 4: Calculate base averages (weighted by recency) using cleaned data
     const dailyData = {};
-    sortedTransactions.forEach(t => {
+    // Process income transactions (after removing outliers)
+    cleanIncomeTransactions.forEach(t => {
         const date = formatDate(t.date);
         if (!dailyData[date]) {
             dailyData[date] = { income: 0, expenses: 0, isWeekend: isWeekend(new Date(t.date)) };
         }
-        if (incomeCategoryIds.includes(t.categoryId)) {
-            dailyData[date].income += Number(t.amount);
-        } else {
-            dailyData[date].expenses += Math.abs(Number(t.amount));
+        dailyData[date].income += Number(t.amount);
+    });
+
+    // Process expense transactions (after removing outliers)
+    cleanExpenseTransactions.forEach(t => {
+        const date = formatDate(t.date);
+        if (!dailyData[date]) {
+            dailyData[date] = { income: 0, expenses: 0, isWeekend: isWeekend(new Date(t.date)) };
         }
+        dailyData[date].expenses += Math.abs(Number(t.amount));
     });
 
     const dailyDataArray = Object.entries(dailyData)

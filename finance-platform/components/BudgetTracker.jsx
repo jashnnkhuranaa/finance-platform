@@ -167,8 +167,8 @@ const BudgetTracker = ({ currency = '₹' }) => {
         sendBudgetAlert('category', cat.name, percentage, budget, spent, remaining);
       }
     });
-  }, [totalBudget, categoryBudgets, transactions, categoriesData, userEmail, categoriesLoading, transactionsLoading, sendBudgetAlert]);
-
+  }, [totalBudget, categoryBudgets, transactions, categoriesData, userEmail, categoriesLoading, transactionsLoading, sendBudgetAlert, getCategorySpent, remainingBudget, totalSpent]);
+  
   if (transactionsLoading || categoriesLoading) {
     return <div className="text-gray-500">Loading budget tracker...</div>;
   }

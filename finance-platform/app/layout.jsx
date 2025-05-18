@@ -1,14 +1,21 @@
-import { Poppins } from "next/font/google";
-import Head from "next/head";
+import { Poppins, Special_Elite } from "next/font/google"; // Changed to Special_Elite (closest match)
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import QueryProviders from "@/providers/query-provider";
 import SheetProvider from "@/providers/sheet-provider";
 
+// Configure Poppins font
 const poppins = Poppins({
   weight: ["400", "700"],
   subsets: ["latin"],
   variable: "--font-poppins",
+});
+
+// Configure Special Elite font (closest match to Special Gothic Expanded One)
+const specialElite = Special_Elite({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-special-elite",
 });
 
 export const metadata = {
@@ -19,13 +26,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <Head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
-      <body className={`${poppins.variable} antialiased`}>
+      <body className={`${poppins.variable} ${specialElite.variable} antialiased`}>
         <QueryProviders>
           <SheetProvider />
           {children}
