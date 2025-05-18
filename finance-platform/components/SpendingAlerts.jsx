@@ -20,10 +20,6 @@ const SpendingAlerts = ({ transactions = [], categories = [], startDate, endDate
       return { name: category.name, totalExpense };
     });
 
-    const daysInRange = Math.ceil(
-      (safeEndDate.getTime() - safeStartDate.getTime()) / (1000 * 60 * 60 * 24)
-    ) || 1;
-
     const totalExpenses = expensesByCategory.reduce((sum, cat) => sum + cat.totalExpense, 0);
     const avgCategoryExpense = totalExpenses / (categories.length || 1);
 

@@ -1,4 +1,3 @@
-// components/BudgetTracker.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -74,7 +73,7 @@ const BudgetTracker = ({ currency = '₹' }) => {
     if (hasChanges) {
       setCategoryBudgets(updatedCategoryBudgets);
     }
-  }, [categoriesData]);
+  }, [categoriesData, categoryBudgets]);
 
   useEffect(() => {
     localStorage.setItem('totalBudget', totalBudget);
@@ -168,7 +167,7 @@ const BudgetTracker = ({ currency = '₹' }) => {
         sendBudgetAlert('category', cat.name, percentage, budget, spent, remaining);
       }
     });
-  }, [totalBudget, categoryBudgets, transactions, categoriesData, userEmail]);
+  }, [totalBudget, categoryBudgets, transactions, categoriesData, userEmail, categoriesLoading, transactionsLoading, sendBudgetAlert]);
 
   if (transactionsLoading || categoriesLoading) {
     return <div className="text-gray-500">Loading budget tracker...</div>;
