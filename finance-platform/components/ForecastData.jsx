@@ -45,28 +45,18 @@ const ForecastData = ({ transactions = [], currency = '₹', categories = [] }) 
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    // Step 2: Calculate date range
-    const firstDate = new Date(sortedTransactions[0].date);
-    const lastDate = new Date(sortedTransactions[sortedTransactions.length - 1].date);
-    const dateRangeDays = Math.ceil(
-        (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
-    ) || 1;
-
-    // Step 3: Separate income and expenses by category
+    // Step 2: Separate income and expenses by category
     const incomeCategoryIds = categories
         .filter(cat => cat.name.toLowerCase().includes('income'))
         .map(cat => cat.id);
     const incomeTransactions = sortedTransactions.filter(t => incomeCategoryIds.includes(t.categoryId));
     const expenseTransactions = sortedTransactions.filter(t => !incomeCategoryIds.includes(t.categoryId));
 
-    // Step 4: Remove outliers
+    // Step 3: Remove outliers
     const cleanIncomeTransactions = removeOutliers(incomeTransactions, 'amount');
     const cleanExpenseTransactions = removeOutliers(expenseTransactions, 'amount');
 
-    const totalIncome = cleanIncomeTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-    const totalExpenses = cleanExpenseTransactions.reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0);
-
-    // Step 5: Calculate base averages (weighted by recency)
+    // Step 4: Calculate base averages (weighted by recency)
     const dailyData = {};
     sortedTransactions.forEach(t => {
         const date = formatDate(t.date);
@@ -84,12 +74,12 @@ const ForecastData = ({ transactions = [], currency = '₹', categories = [] }) 
         .map(([date, { income, expenses, isWeekend }]) => ({ date, income, expenses, isWeekend }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Step 6: Apply Weighted Moving Average for smoothing
+    // Step 5: Apply Weighted Moving Average for smoothing
     const windowSize = 7; // 7-day moving average
     const incomeWMA = calculateWMA(dailyDataArray, 'income', windowSize);
     const expensesWMA = calculateWMA(dailyDataArray, 'expenses', windowSize);
 
-    // Step 7: Calculate seasonality factors (weekday vs weekend)
+    // Step 6: Calculate seasonality factors (weekday vs weekend)
     const weekdayData = dailyDataArray.filter(d => !d.isWeekend);
     const weekendData = dailyDataArray.filter(d => d.isWeekend);
     const avgWeekdayIncome = weekdayData.length > 0
@@ -105,12 +95,12 @@ const ForecastData = ({ transactions = [], currency = '₹', categories = [] }) 
         ? weekendData.reduce((sum, d) => sum + d.expenses, 0) / weekendData.length
         : 0;
 
-    // Step 8: Exponential smoothing for forecasting
+    // Step 7: Exponential smoothing for forecasting
     const alpha = 0.3; // Smoothing factor (0 to 1, closer to 1 means more weight to recent data)
     let lastIncome = incomeWMA[incomeWMA.length - 1] || 0;
     let lastExpenses = expensesWMA[expensesWMA.length - 1] || 0;
 
-    // Step 9: Generate 7-day forecast with seasonality and smoothing
+    // Step 8: Generate 7-day forecast with seasonality and smoothing
     const forecastData = [];
     const today = new Date();
     for (let i = 1; i <= 7; i++) {
