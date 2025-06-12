@@ -46,6 +46,7 @@
     "react-toastify": "^11.0.5",
     "react-use": "^17.6.0",
     "recharts": "^2.15.3",
+    "run": "^1.5.0",
     "shadcn-ui": "^0.9.5",
     "sheet": "^0.2.0",
     "tailwind-merge": "^3.2.0",

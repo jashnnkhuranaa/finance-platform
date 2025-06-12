@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { formatCurrency } from "@/lib/utils/transaction";
 import Input from '@/components/ui/input';
@@ -25,7 +25,7 @@ const BudgetTracker = ({ currency = '₹' }) => {
   const [userEmail, setUserEmail] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [alertsSent, setAlertsSent] = useState(() => {
-    return localStorage.getItem('alertsSent') ? JSON.parse(localStorage.getItem('alertsSent')) : {};
+    return localStorage.getItem('alertsSent') ? JSON.parse(localStorage.getItem('alertsFailed')) : {};
   });
 
   useEffect(() => {
@@ -86,16 +86,16 @@ const BudgetTracker = ({ currency = '₹' }) => {
     .reduce((sum, txn) => sum + Math.abs(Number(txn.amount)), 0);
   const remainingBudget = totalBudget - totalSpent;
 
-  const getCategorySpent = (categoryName) => {
+  const getCategorySpent = useCallback((categoryName) => {
     return transactions
       .filter(txn => {
         const category = categoriesData.find(cat => cat.id === txn.categoryId);
         return category && category.name === categoryName && txn.amount < 0;
       })
       .reduce((sum, txn) => sum + Math.abs(Number(txn.amount)), 0);
-  };
+  }, [transactions, categoriesData]);
 
-  const sendBudgetAlert = async (type, category, percentage, budget, spent, remaining) => {
+  const sendBudgetAlert = useCallback(async (type, category, percentage, budget, spent, remaining) => {
     if (!userEmail) {
       console.log("BudgetTracker: No user email, skipping budget alert");
       return;
@@ -145,7 +145,7 @@ const BudgetTracker = ({ currency = '₹' }) => {
     } catch (error) {
       console.error('BudgetTracker: Error sending budget alert:', error.message);
     }
-  };
+  }, [userEmail, alertsSent, currency]);
 
   useEffect(() => {
     if (transactionsLoading || categoriesLoading || !userEmail) {

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import  Label  from '@/components/ui/label';
-import  Input  from '@/components/ui/input';
-import  Button  from '@/components/ui/button';
+import Label from '@/components/ui/label';
+import Input from '@/components/ui/input';
+import Button from '@/components/ui/button';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -98,21 +98,21 @@ const LoginPage = () => {
                 placeholder="Enter your password"
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md">
-              Login
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
             {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
           </form>
           <p className="mt-4 text-center text-sm">
-            Don't have an account?{' '}
-            <Button
-              variant="link"
-              onClick={() => router.push('/signup')}
-              className="text-blue-600 hover:underline"
-            >
-              Sign Up
-            </Button>
-          </p>
+  Create new account{' '}
+  <Button
+    variant="link"
+    onClick={() => router.push('/signup')}
+    className="text-blue-600 hover:underline"
+  >
+    Sign Up
+  </Button>
+</p>
         </CardContent>
       </Card>
     </div>
