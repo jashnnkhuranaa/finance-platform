@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/db/users";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { signAccessToken, setAuthCookies } from "@/lib/auth/jwt";
 
 export async function POST(req) {

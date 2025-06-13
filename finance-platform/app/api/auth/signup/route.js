@@ -3,7 +3,7 @@
 
 import { NextResponse } from "next/server";
 import { createUser, getUserByEmail } from "@/lib/db/users";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { z } from "zod";
 
 const registerSchema = z.object({
