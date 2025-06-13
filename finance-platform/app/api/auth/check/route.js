@@ -1,4 +1,3 @@
-// app/api/auth/check/route.js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@/lib/auth/jwt";
@@ -9,7 +8,7 @@ export async function GET() {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
 
-    console.log("Auth Check: Access Token:", accessToken);
+    console.log("Auth Check: Access Token:", accessToken ? "Present" : "Not Present");
 
     if (!accessToken) {
       console.log("Auth Check: No access token found");
@@ -28,7 +27,7 @@ export async function GET() {
     }
 
     console.log("Auth Check: Token Payload:", payload);
-    return NextResponse.json({ isAuthenticated: true }, { status: 200 });
+    return NextResponse.json({ isAuthenticated: true, userId: payload.id }, { status: 200 });
   } catch (error) {
     console.error("❌ Auth check error:", error.message);
     const response = NextResponse.json(

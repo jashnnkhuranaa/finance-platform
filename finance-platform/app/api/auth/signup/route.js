@@ -3,7 +3,7 @@
 
 import { NextResponse } from "next/server";
 import { createUser, getUserByEmail } from "@/lib/db/users";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs"; // Switched to bcryptjs
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -31,7 +31,7 @@ export async function POST(req) {
       );
     }
 
-    // Hash password
+    // Hash password with bcryptjs
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user

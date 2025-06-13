@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/db/users";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs"; // Switched to bcryptjs
 import { signAccessToken, setAuthCookies } from "@/lib/auth/jwt";
 
 export async function POST(req) {
@@ -10,6 +10,7 @@ export async function POST(req) {
 
     console.log("Login Attempt: Email:", email);
 
+    // Validate input
     if (!email || !password) {
       console.log("Login Error: Missing email or password");
       return NextResponse.json(
@@ -24,6 +25,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid email" }, { status: 401 });
     }
 
+    // Use bcryptjs compare (asynchronous)
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log("Login Error: Invalid password");
@@ -41,7 +43,7 @@ export async function POST(req) {
 
     return setAuthCookies(res, accessToken);
   } catch (error) {
-    console.error("❌ Login error:", error.message);
+    console.error("❌ Login error:", error);
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }

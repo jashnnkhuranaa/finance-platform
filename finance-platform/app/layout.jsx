@@ -1,6 +1,7 @@
-import { Poppins, Special_Elite } from "next/font/google"; // Changed to Special_Elite (closest match)
+import { Poppins, Special_Elite } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import { ToastContainer } from "react-toastify"; // Switched to react-toastify
+import "react-toastify/dist/ReactToastify.css"; // Add CSS for react-toastify
 import QueryProviders from "@/providers/query-provider";
 import SheetProvider from "@/providers/sheet-provider";
 
@@ -30,8 +31,8 @@ export default function RootLayout({ children }) {
         <QueryProviders>
           <SheetProvider />
           {children}
+          <ToastContainer position="top-right" autoClose={3000} /> {/* Added ToastContainer */}
         </QueryProviders>
-        <Toaster position="top-right" />
       </body>
     </html>
   );

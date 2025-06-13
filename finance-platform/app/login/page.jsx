@@ -21,6 +21,13 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Client-side validation
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     console.log('Form submitted with:', { email, password });
@@ -63,6 +70,7 @@ const LoginPage = () => {
         position: 'top-right',
         autoClose: 3000,
       });
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -104,15 +112,15 @@ const LoginPage = () => {
             {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
           </form>
           <p className="mt-4 text-center text-sm">
-  Create new account{' '}
-  <Button
-    variant="link"
-    onClick={() => router.push('/signup')}
-    className="text-blue-600 hover:underline"
-  >
-    Sign Up
-  </Button>
-</p>
+            Create new account{' '}
+            <Button
+              variant="link"
+              onClick={() => router.push('/signup')}
+              className="text-blue-600 hover:underline"
+            >
+              Sign Up
+            </Button>
+          </p>
         </CardContent>
       </Card>
     </div>
