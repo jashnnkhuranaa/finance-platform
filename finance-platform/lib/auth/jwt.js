@@ -1,7 +1,7 @@
 // lib/auth/jwt.js
 import jwt from "jsonwebtoken";
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "access-secret";
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 const signAccessToken = (payload) => {
   const tokenPayload = { ...payload, userId: payload.id };
