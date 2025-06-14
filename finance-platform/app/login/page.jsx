@@ -22,7 +22,6 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Client-side validation
     if (!email || !password) {
       setError('Please enter both email and password');
       return;
@@ -60,8 +59,10 @@ const LoginPage = () => {
       console.log('Auth Check Response:', authData);
 
       if (authData.isAuthenticated) {
+        console.log('User is authenticated, redirecting to /overview');
         router.replace('/overview');
       } else {
+        console.error('Session not set properly:', authData);
         throw new Error('Session not set properly after login');
       }
     } catch (err) {
