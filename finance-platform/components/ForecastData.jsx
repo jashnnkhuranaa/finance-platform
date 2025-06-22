@@ -36,7 +36,7 @@ const ForecastData = ({ transactions = [], currency = '₹', categories = [] }) 
     console.log("ForecastData Transactions:", transactions);
 
     if (!Array.isArray(transactions) || transactions.length === 0) {
-        console.error("transactions is not an array or is empty:", transactions);
+        console.log("transactions is not an array or is empty:", transactions);
         return <p className="text-gray-500">No forecast data available.</p>;
     }
 
