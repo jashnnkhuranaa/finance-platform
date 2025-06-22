@@ -1,28 +1,37 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 
 const useTransactions = () => {
   return useQuery({
-    queryKey: ["transactions"],
+    queryKey: ['transactions'],
     queryFn: async () => {
       try {
-        const response = await fetch("/api/transactions", {
-          method: "GET",
-          credentials: "include",
+        const response = await fetch('/api/transactions', {
+          method: 'GET',
+          credentials: 'include',
           headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache",
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
           },
         });
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Fetch transactions error:", errorData);
-          throw new Error(errorData.error || "Failed to fetch transactions");
+
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Non-JSON response:', text.slice(0, 100));
+          throw new Error('Server returned an invalid response');
         }
+
         const data = await response.json();
-        console.log("Fetched transactions:", data);
+        if (!response.ok) {
+          console.error('Fetch transactions error:', data);
+          throw new Error(data.error || 'Failed to fetch transactions');
+        }
+
+        console.log('Fetched transactions:', data);
         return data.transactions || [];
       } catch (error) {
-        console.error("useTransactions error:", error.message);
+        console.error('useTransactions error:', error.message);
         throw error;
       }
     },

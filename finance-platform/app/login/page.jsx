@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Label from '@/components/ui/label';
 import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -24,12 +25,15 @@ const LoginPage = () => {
 
     if (!email || !password) {
       setError('Please enter both email and password');
+      toast.error('Please enter both email and password', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
       return;
     }
 
     setLoading(true);
     setError(null);
-    console.log('Form submitted with:', { email, password });
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -41,6 +45,14 @@ const LoginPage = () => {
         credentials: 'include',
       });
 
+      // Check if response is not JSON
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        console.error('Non-JSON response:', text.slice(0, 100));
+        throw new Error('Server returned an invalid response');
+      }
+
       const data = await res.json();
       console.log('API Response:', { status: res.status, data });
 
@@ -48,13 +60,20 @@ const LoginPage = () => {
         throw new Error(data.error || 'Login failed');
       }
 
-      console.log('Login successful, checking session');
+      // Check session
       const authCheck = await fetch('/api/auth/check', {
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache',
         },
       });
+
+      if (!authCheck.headers.get('content-type')?.includes('application/json')) {
+        const text = await authCheck.text();
+        console.error('Non-JSON auth check response:', text.slice(0, 100));
+        throw new Error('Invalid auth check response');
+      }
+
       const authData = await authCheck.json();
       console.log('Auth Check Response:', authData);
 
@@ -62,7 +81,6 @@ const LoginPage = () => {
         console.log('User is authenticated, redirecting to /overview');
         router.replace('/overview');
       } else {
-        console.error('Session not set properly:', authData);
         throw new Error('Session not set properly after login');
       }
     } catch (err) {
@@ -107,8 +125,19 @@ const LoginPage = () => {
                 placeholder="Enter your password"
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                'Login'
+              )}
             </Button>
             {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
           </form>
